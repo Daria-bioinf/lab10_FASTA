@@ -11,6 +11,8 @@ using System.IO;
 using Newtonsoft.Json;
 using CsvHelper;
 using System.Globalization;
+using LiveCharts;
+using LiveCharts.Wpf;
 
 
 
@@ -98,13 +100,41 @@ namespace lab10_FASTA
 
                 foreach (var seq in sequenceList)
                 {
-                    listBox1.Items.Add(seq.Name);                
+                    listBox1.Items.Add(seq.Name.Substring(0, Math.Min(25, seq.Name.Length)));
                 }
                 dataGridView1.DataSource = sequenceList;
 
                 dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+                cartesianChart1.Series = new SeriesCollection
+                {
+                    new ColumnSeries
+                    {
+                        Title = "Sequence Length",
+                        Values = new ChartValues<int>(sequenceList.Select(s => s.Length))
+                    }
+                };
+
+                cartesianChart1.AxisX.Clear();
+
+                cartesianChart1.AxisX.Add(new Axis
+                {
+                    Title = "Sequences",
+
+                    Labels = sequenceList
+                        .Select(s => s.Name.Substring(0, Math.Min(10, s.Name.Length)))
+                        .ToList(),
+
+                    LabelsRotation = 15,
+
+                    Separator = new Separator
+                    {
+                        Step = 1
+                    }
+                });
             }
         }
+
         private SequenceData AnalyzeSequence(string name, string sequence)
         {
             int a = sequence.Count(x => x == 'A');
@@ -149,7 +179,7 @@ namespace lab10_FASTA
         }
 
         private void buttonCsv_Click(object sender, EventArgs e)
-        {
+        {   
             SaveFileDialog saveFileDialog = new SaveFileDialog();
 
             saveFileDialog.Filter = "CSV files (*.csv)|*.csv";
